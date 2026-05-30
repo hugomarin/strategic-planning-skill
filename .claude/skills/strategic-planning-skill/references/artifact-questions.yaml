@@ -1,0 +1,501 @@
+# artifact-questions.yaml
+# Reference file for the Strategic Planning Skill.
+#
+# Purpose:
+#   Provides the agent with structured evaluation criteria for each Knowledge Artifact.
+#   Used in two moments:
+#     1. During _analysis.md production (Fase 0): to build the coverage map.
+#     2. During artifact generation: to verify each section has a sufficient answer before closing the file.
+#
+# Structure per question:
+#   id:               unique identifier (artifact prefix + number)
+#   question:         what the agent must answer to complete the section
+#   section:          which section of the artifact this maps to
+#   type:             required | quality
+#                     required = artifact is incomplete without this answer
+#                     quality  = artifact is weak without this answer, but can proceed with NHR marker
+#   failure_signal:   what a bad or insufficient answer looks like
+#   needs_human_review_if: condition that triggers a Needs Human Review marker
+
+# ─────────────────────────────────────────────
+# STRATEGY BRIEF
+# ─────────────────────────────────────────────
+artifacts:
+
+  - artifact: strategy-brief
+    description: >
+      Defines the strategic direction of the product.
+      Must be specific enough that two different agents reading it
+      would make the same prioritization decisions.
+    questions:
+
+      - id: SB-01
+        question: "What specific problem does this product solve, for whom, and why now?"
+        section: Problem
+        type: required
+        failure_signal: >
+          Answer is generic (e.g. 'people struggle to manage relationships') or
+          could apply to any product in the category. Missing the 'why now' angle.
+        needs_human_review_if: "No urgency signal or market timing is present in the Input."
+
+      - id: SB-02
+        question: "Who is the primary user and what observable, external signals identify them — not attitudes or aspirations?"
+        section: Target User / ICP
+        type: required
+        failure_signal: >
+          ICP is defined by mindset ('people who value relationships') rather than
+          observable criteria (company stage, role, tool usage, measurable behavior).
+          Cannot be reduced to a SQL query or an audience filter.
+        needs_human_review_if: "Input describes user by aspiration only, with no extensional criteria."
+
+      - id: SB-03
+        question: "What specific value does the product create that the user cannot get elsewhere or gets significantly worse elsewhere?"
+        section: Value Proposition
+        type: required
+        failure_signal: >
+          Value prop is a feature list or a generic claim ('saves time', 'increases productivity').
+          Does not explain the mechanism of value or why the user would perceive it as meaningfully different.
+        needs_human_review_if: "No differentiation claim survives the question: 'why can't they just use [main alternative]?'"
+
+      - id: SB-04
+        question: "What makes this product genuinely different from the most credible alternatives a user would consider?"
+        section: Differentiation
+        type: required
+        failure_signal: >
+          Differentiation is framed as a feature advantage ('we have X, they don't') rather than
+          a structural or positional difference. Does not hold up against the alternative
+          that a well-funded competitor could copy it in 6 months.
+        needs_human_review_if: "Differentiation claim depends entirely on a feature that is replicable."
+
+      - id: SB-05
+        question: "What are the 2-3 most important things the product must prioritize right now, and why in that order?"
+        section: Priorities
+        type: required
+        failure_signal: >
+          Priorities are a list of desirable outcomes without a stated rationale for sequencing.
+          Any item on the list could plausibly be first without changing the argument.
+        needs_human_review_if: "No sequencing logic is derivable from the Input."
+
+      - id: SB-06
+        question: "What should explicitly NOT be built yet, and why?"
+        section: Anti-priorities
+        type: required
+        failure_signal: >
+          Anti-priorities are absent, or are obviously bad ideas rather than genuinely
+          attractive options that must be deferred. Good anti-priorities are things
+          the team might want to build but shouldn't yet.
+        needs_human_review_if: "Input does not contain any signal about what is being deliberately deferred."
+
+      - id: SB-07
+        question: "What observable signals would indicate the strategy is working at 3, 6, and 12 months?"
+        section: Success Criteria
+        type: quality
+        failure_signal: >
+          Success criteria are output metrics ('ship X features') rather than
+          outcome signals ('users report behavior change', 'warm intros represent X% of pipeline').
+          Not falsifiable — you could claim success without the product working.
+        needs_human_review_if: "Input contains no measurable outcomes or user behavior signals."
+
+      - id: SB-08
+        question: "What strategic principles should guide product, roadmap, and execution decisions when there is a trade-off?"
+        section: Strategic Principles
+        type: quality
+        failure_signal: >
+          Principles are values statements ('we care about quality') rather than
+          decision rules ('when care features and algorithm features compete, care features go first').
+          A principle that does not resolve a real trade-off is decoration.
+        needs_human_review_if: "No trade-off situations are inferable from the Input."
+
+
+# ─────────────────────────────────────────────
+# PRODUCT THESIS
+# ─────────────────────────────────────────────
+
+  - artifact: product-thesis
+    description: >
+      Captures the central product bet and its implications.
+      Must be specific enough to be falsifiable.
+      If the thesis cannot be proven wrong, it is not a thesis.
+    questions:
+
+      - id: PT-01
+        question: "What is the single central bet this product makes — stated in one sentence that could be proven wrong?"
+        section: Central Thesis
+        type: required
+        failure_signal: >
+          Thesis is a vision statement or aspiration ('we want to transform how people
+          manage relationships') rather than a falsifiable claim ('professionals grow
+          faster by deepening existing relationships than by expanding contact volume').
+          A good thesis has a clear counter-thesis.
+        needs_human_review_if: "Input contains a mission statement but no falsifiable product bet."
+
+      - id: PT-02
+        question: "What does this product believe that the market, incumbents, or conventional wisdom gets wrong or underestimates?"
+        section: Non-obvious Belief
+        type: required
+        failure_signal: >
+          Non-obvious belief is actually obvious ('people want better tools') or
+          is the same claim every competitor would make. Must identify something
+          the category systematically ignores or solves poorly.
+        needs_human_review_if: "No contrarian or non-consensus claim is present in the Input."
+
+      - id: PT-03
+        question: "What assumptions must be true for the thesis to work? List them explicitly."
+        section: Assumptions
+        type: required
+        failure_signal: >
+          Assumptions are not listed, or are listed as facts. Every assumption
+          should be something that could turn out to be false. If none of the
+          assumptions could plausibly fail, they are not assumptions — they are claims.
+        needs_human_review_if: >
+          Input presents the thesis as established fact with no acknowledgment
+          of what must be true for it to hold.
+
+      - id: PT-04
+        question: "What evidence exists today — user signals, market data, behavioral patterns, prior learnings — that supports the thesis?"
+        section: Evidence
+        type: required
+        failure_signal: >
+          Evidence section contains only logic ('it makes sense that...') or
+          analogies ('look at how [other company] succeeded') without direct
+          signals from users, market behavior, or measurable data points.
+        needs_human_review_if: "Input contains no user research, interviews, or behavioral signals."
+
+      - id: PT-05
+        question: "What is the strongest argument against this thesis?"
+        section: Challenge / Counterargument
+        type: required
+        failure_signal: >
+          Counterargument is a strawman ('some people might not like change') rather
+          than the most credible, well-reasoned objection a skeptic would make.
+          The agent must steelman the opposition, not dismiss it.
+        needs_human_review_if: "Input contains no acknowledgment of risks or alternative views."
+
+      - id: PT-06
+        question: "What would have to happen to prove the thesis weak or false?"
+        section: Falsification Risks
+        type: required
+        failure_signal: >
+          Falsification risks are vague ('if the market doesn't respond') or
+          are just restatements of business risks. Must identify the specific
+          user behavior or market signal that would contradict the thesis directly.
+        needs_human_review_if: "No falsification condition is derivable from the Input."
+
+      - id: PT-07
+        question: "What does this thesis require from the product — what must be true about UX, features, and constraints?"
+        section: Product Implications
+        type: required
+        failure_signal: >
+          Product implications are generic ('the product must be easy to use') or
+          do not follow logically from the thesis. Each implication should be
+          traceable back to a specific claim in the thesis.
+        needs_human_review_if: "Thesis and product implications are disconnected — different agents would derive different products."
+
+      - id: PT-08
+        question: "What does this thesis require from the build sequence — what must be built first and why?"
+        section: Roadmap Implications
+        type: quality
+        failure_signal: >
+          Roadmap implications do not follow from the thesis. The build sequence
+          could be reversed without contradicting the thesis. Or the thesis implies
+          a different first bet than what the roadmap describes.
+        needs_human_review_if: "No sequencing logic is derivable from the thesis."
+
+
+# ─────────────────────────────────────────────
+# USER ARCHITECTURE
+# ─────────────────────────────────────────────
+
+  - artifact: user-architecture
+    description: >
+      Defines who the product is built for with enough precision
+      that it can drive acquisition filters, onboarding design,
+      feature prioritization, and copy tone simultaneously.
+      Must use both extensional (ICP) and intensional (Buyer Persona) logic.
+    questions:
+
+      - id: UA-01
+        question: "Who is the primary user described in observable, selectable criteria — company stage, role, tool usage, measurable behavior?"
+        section: Primary User / ICP
+        type: required
+        failure_signal: >
+          Primary user is defined by aspiration, attitude, or self-identification
+          ('people who care about relationships') rather than attributes
+          observable from the outside. Cannot be used to build an audience filter.
+        needs_human_review_if: "Input describes user only by mindset or pain, not by observable profile."
+
+      - id: UA-02
+        question: "What observable signals — tools used, behaviors, actions — indicate this user is a strong fit right now?"
+        section: Observable Signals
+        type: required
+        failure_signal: >
+          Signals are too broad ('uses a CRM', 'has a LinkedIn profile') to
+          distinguish this user from a much larger population.
+          Good signals are specific enough that seeing them raises fit probability significantly.
+        needs_human_review_if: "Input contains no behavioral or tool-usage signals."
+
+      - id: UA-03
+        question: "What is the central tension this user lives with — the gap between what they want to do and what their current system allows?"
+        section: Jobs / Needs / Frictions
+        type: required
+        failure_signal: >
+          Tension is framed as a feature gap ('they don't have a tool for X')
+          rather than a real-life friction ('they spend 8 hours on something
+          that should take 30 minutes and lose the work when they're done').
+          Must be specific enough that the user would recognize themselves in it.
+        needs_human_review_if: "Input describes problem abstractly without concrete friction or workaround evidence."
+
+      - id: UA-04
+        question: "What workarounds does this user use today — what tools or behaviors indicate the problem exists and they are trying to solve it?"
+        section: Jobs / Needs / Frictions
+        type: required
+        failure_signal: >
+          Workarounds are absent or are hypothetical. Real workarounds are
+          observable behavior (spreadsheets they maintain, manual processes they run,
+          tools they misuse). Their presence is strong evidence the problem is real.
+        needs_human_review_if: "Input contains no workaround evidence."
+
+      - id: UA-05
+        question: "What triggers the purchase decision — what specific moment or event makes this user look for a solution right now?"
+        section: User Segments (intensional mechanism)
+        type: required
+        failure_signal: >
+          Purchase trigger is a chronic pain ('they always struggle with this')
+          rather than a specific triggering event. Chronic pain produces awareness,
+          not purchase. A trigger is a moment: a fundraise starting, a quarter missed,
+          an intro that went wrong.
+        needs_human_review_if: "Input describes pain but no specific triggering event."
+
+      - id: UA-06
+        question: "Who is explicitly excluded from this product in this phase, and why?"
+        section: Exclusions
+        type: required
+        failure_signal: >
+          Exclusions are absent, or only exclude obviously irrelevant users.
+          Good exclusions are users who might seem like a fit but would
+          pull the product in the wrong direction (e.g. users who need volume,
+          not depth; users who need team features before individual features work).
+        needs_human_review_if: "Input does not explicitly address who the product is NOT for."
+
+      - id: UA-07
+        question: "Why would this user adopt, use regularly, and pay — what is the adoption logic for each segment?"
+        section: Adoption Logic
+        type: required
+        failure_signal: >
+          Adoption logic is generic ('they will use it because it solves their problem').
+          Must explain the specific mechanism: what makes them try it, what makes them
+          come back, what makes the switching cost real over time.
+        needs_human_review_if: "No retention or lock-in mechanism is described in the Input."
+
+      - id: UA-08
+        question: "What product decisions follow directly from this user architecture — what must be true about onboarding, features, and copy?"
+        section: Product Implications
+        type: quality
+        failure_signal: >
+          Product implications are generic ('the product must be easy to use') or
+          do not follow from the specific user segments described.
+          Each implication should be traceable to a specific segment tension or trigger.
+        needs_human_review_if: "User architecture and product implications are disconnected."
+
+
+# ─────────────────────────────────────────────
+# PRODUCT ARCHITECTURE
+# ─────────────────────────────────────────────
+
+  - artifact: product-architecture
+    description: >
+      Translates strategy and user understanding into product structure.
+      Must be specific enough that a developer, designer, or agent
+      can make implementation decisions without reinterpreting the strategy.
+    questions:
+
+      - id: PA-01
+        question: "What principles should guide product decisions when there is a trade-off between two valid options?"
+        section: Product Principles
+        type: required
+        failure_signal: >
+          Principles are values ('we care about simplicity') rather than
+          decision rules ('when algorithmic sophistication and care UX compete,
+          care UX goes first'). A principle that does not resolve a real trade-off
+          is not a principle — it is a preference.
+        needs_human_review_if: "No trade-off situations are derivable from the strategy."
+
+      - id: PA-02
+        question: "What are the core modules or capabilities the product requires, and what does each one do?"
+        section: Core Modules
+        type: required
+        failure_signal: >
+          Modules are named but not defined, or are so granular they describe
+          features rather than capability domains. Each module should represent
+          a coherent area of product responsibility, not a screen or a button.
+        needs_human_review_if: "Input describes features but no module-level organization."
+
+      - id: PA-03
+        question: "What flows must work end-to-end for the product to express its thesis — what is the critical path?"
+        section: Critical Flows
+        type: required
+        failure_signal: >
+          Critical flows are described as feature lists rather than sequences of
+          user actions and system responses. A flow must have a start, steps, and
+          an outcome. 'User manages contacts' is not a flow.
+        needs_human_review_if: "Input does not describe user journeys or interaction sequences."
+
+      - id: PA-04
+        question: "What features are indispensable — without them the product cannot deliver its core value proposition?"
+        section: Core Features
+        type: required
+        failure_signal: >
+          Core features list is too long (more than 8-10 items) or includes
+          features that are enhancing rather than enabling. If removing a feature
+          from the list does not break the thesis, it is not a core feature.
+        needs_human_review_if: "Input does not distinguish between enabling and enhancing features."
+
+      - id: PA-05
+        question: "What are the hard constraints — rules that cannot be broken without compromising the product's integrity or trust?"
+        section: Product Constraints
+        type: required
+        failure_signal: >
+          Constraints are preferences ('we prefer not to auto-send') rather than
+          rules with teeth ('the product never sends a message without explicit
+          user action — any feature that reduces this friction is rejected').
+          A constraint without an enforcement mechanism is a guideline.
+        needs_human_review_if: "Input describes design preferences but no hard rules."
+
+      - id: PA-06
+        question: "What dependencies exist between modules, features, data, or external systems that affect build sequence?"
+        section: Dependencies
+        type: required
+        failure_signal: >
+          Dependencies are listed as integrations ('we need Google OAuth') rather
+          than sequencing constraints ('Feature B cannot deliver value without
+          Feature A producing data first'). Must identify what blocks what.
+        needs_human_review_if: "Input describes features in isolation without sequencing logic."
+
+      - id: PA-07
+        question: "What are the top risks that could prevent the product from working as intended — technically, in adoption, or in design?"
+        section: Risks
+        type: required
+        failure_signal: >
+          Risks are generic ('the market might not respond') rather than
+          specific to this product's architecture ('if the TrustGraph initial
+          classification does not match user intuition, trust is lost in 3 minutes
+          and the user does not return'). Each risk should name the specific
+          failure mechanism.
+        needs_human_review_if: "Input does not acknowledge architectural or adoption risks."
+
+      - id: PA-08
+        question: "What should be built first, what later, and what not yet — and does this sequence follow from the constraints and dependencies?"
+        section: Roadmap Implications
+        type: required
+        failure_signal: >
+          Roadmap implications list desired features without a rationale for
+          sequencing. The sequence should be derivable from dependencies,
+          constraints, and validation needs — not from desirability alone.
+        needs_human_review_if: "No sequencing logic follows from the architecture described."
+
+      - id: PA-09
+        question: "If feature children exist: does product-architecture.md include an index table linking to all feature files?"
+        section: Feature Children Index
+        type: quality
+        failure_signal: >
+          Feature children exist in features/ but are not referenced from
+          product-architecture.md. A reader of the parent cannot navigate
+          to the children without knowing they exist.
+        needs_human_review_if: "features/ directory exists but product-architecture.md has no index."
+
+
+# ─────────────────────────────────────────────
+# OBJECTIVES ARCHITECTURE
+# ─────────────────────────────────────────────
+
+  - artifact: objectives-architecture
+    description: >
+      Defines the measurable validation layer of the strategy.
+      Must be specific enough that the team can determine, at the end of each phase,
+      whether the strategy is working or not.
+      If the objectives cannot be measured, they are not objectives — they are wishes.
+    questions:
+
+      - id: OA-01
+        question: "What are the strategic objectives — the business or user behavior changes the product must produce, not features it must ship?"
+        section: Strategic Objectives
+        type: required
+        failure_signal: >
+          Objectives are output-based ('ship onboarding flow', 'launch marketplace')
+          rather than outcome-based ('X% of users complete first meaningful action within 7 days',
+          'warm intros represent X% of sourced deals'). If you can achieve the objective
+          without the product working, it is not a strategic objective.
+        needs_human_review_if: "Input defines success only in terms of features shipped, not user behavior or business outcomes."
+
+      - id: OA-02
+        question: "For each roadmap phase, what is the single most important thing that must be true at the end of it?"
+        section: OKRs by Phase
+        type: required
+        failure_signal: >
+          Objectives per phase are generic ('improve product quality', 'grow user base')
+          or are copied from the overall strategy without being phase-specific.
+          Each phase objective must be achievable within that phase's scope and timeline.
+        needs_human_review_if: "Input does not suggest a phased rollout or does not distinguish validation stages."
+
+      - id: OA-03
+        question: "What are the 2-3 key results per phase that would prove the objective was achieved — stated as measurable signals with targets?"
+        section: OKRs by Phase
+        type: required
+        failure_signal: >
+          Key results are binary milestones ('we launched X') rather than measurable signals
+          with a target value and a measurement method. A KR without a number is not a KR.
+          'Users find value' is not a KR. 'X% of users return within 7 days' is a KR.
+        needs_human_review_if: "Input contains no quantitative signals, benchmarks, or conversion targets."
+
+      - id: OA-04
+        question: "What specific event or data point — observable, not inferable — confirms that a given phase worked?"
+        section: OKRs by Phase — Validation milestone
+        type: required
+        failure_signal: >
+          Validation milestone is a feeling or judgment ('users seemed happy', 'team felt confident')
+          rather than an observable event ('X users completed the core flow without support',
+          'conversion from trial to paid exceeded X%').
+        needs_human_review_if: "No observable validation event is derivable from the Input."
+
+      - id: OA-05
+        question: "Which claim in product-thesis.md does each phase validate or falsify?"
+        section: OKRs by Phase — Thesis link
+        type: required
+        failure_signal: >
+          Phases are not connected to the thesis. Building phases without a thesis link
+          means you can complete the roadmap without ever testing whether the central
+          product bet was right. Each phase must de-risk at least one thesis assumption.
+        needs_human_review_if: "Roadmap phases and product thesis are defined independently with no explicit connection."
+
+      - id: OA-06
+        question: "What events or data points would indicate the thesis is NOT working — and at what threshold do they trigger a strategic response?"
+        section: Falsification Signals
+        type: required
+        failure_signal: >
+          Falsification signals are absent, or are so severe they would only be detected
+          after catastrophic failure ('nobody uses the product'). Good falsification signals
+          are early warnings at phase boundaries: 'if X% retention is not reached by end of
+          Phase 1, the core value assumption is at risk.'
+        needs_human_review_if: "Input does not acknowledge conditions under which the strategy would need to be revised."
+
+      - id: OA-07
+        question: "What must be validated first, and why — what is the sequencing logic for validation?"
+        section: Validation Sequence
+        type: required
+        failure_signal: >
+          Validation sequence is arbitrary or follows feature complexity rather than
+          uncertainty. The most uncertain assumption should be validated earliest,
+          at the lowest possible cost. If the sequence cannot be justified by
+          uncertainty or cost, it is not a validation sequence — it is a build order.
+        needs_human_review_if: "Input does not signal which assumptions carry the most strategic risk."
+
+      - id: OA-08
+        question: "What metrics might look positive but would actually indicate the wrong thing — what should the team not optimize for?"
+        section: Anti-metrics
+        type: quality
+        failure_signal: >
+          Anti-metrics are absent. Every product has metrics that are easy to move
+          but misleading (pageviews instead of engagement, signups instead of activation,
+          feature usage instead of value realization). Without anti-metrics, teams
+          optimize for visibility, not outcomes.
+        needs_human_review_if: "Input does not distinguish between vanity metrics and outcome metrics."

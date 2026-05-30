@@ -1,0 +1,9 @@
+# macOS
+.DS_Store
+**/.DS_Store
+
+# Temporary skill scaffolding (deleted before handoff)
+Knowledge Artifacts/_analysis.md
+
+# Root-level skill patch file (superseded by .claude/skills/)
+SKILL-v6.md
