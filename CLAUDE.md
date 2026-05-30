@@ -14,7 +14,7 @@ Deus is a Product Harness for converting strategic intention into verifiable, ve
 
 This project uses `/sp-*` commands defined in the strategic-planning-skill SKILL.md.
 
-When the user sends any message beginning with `/sp-`, read the SKILL.md before executing. The skill file contains all execution logic, phase definitions, gates, and templates. Do not execute `/sp-*` commands from memory or training — always load the skill first.
+When the user sends any message beginning with `/sp-` or `sp-` (with or without the slash — Cowork does not support slash commands natively), read the SKILL.md before executing. The skill file contains all execution logic, phase definitions, gates, and templates. Do not execute `sp-*` commands from memory or training — always load the skill first.
 
 Skill location (active): `.claude/skills/strategic-planning-skill/SKILL.md` in this project folder. The skill is fully self-contained — no dependency on the global installed plugin.
 
