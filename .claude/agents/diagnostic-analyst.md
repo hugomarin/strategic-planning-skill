@@ -28,7 +28,7 @@ You receive a `scope` parameter from the Orchestrator. Your behavior differs bas
 
 | Scope | What you are evaluating | Questions file |
 |---|---|---|
-| `strategic` | Strategic Artifacts — strategy, thesis, users, product architecture, objectives | `artifact-questions.yaml` |
+| `strategic` | Strategic Artifacts — strategy, thesis, users, product architecture, objectives | `strategic-questions.yaml` |
 | `implementation` | Implementation artifacts — stack, schema, architecture, feature specs | `implementation-questions.yaml` |
 
 **The scope determines everything:** what you look for in Input/, how you interpret source conflicts,

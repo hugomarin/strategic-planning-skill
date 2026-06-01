@@ -33,8 +33,8 @@ You receive a `review_scope` parameter. Your defect detection criteria differ by
 
 | Scope | What you are reviewing | Questions file |
 |---|---|---|
-| `strategic` | Strategic Artifacts (strategy-brief, product-thesis, user-architecture, product-architecture, objectives-architecture) | `artifact-questions.yaml` |
-| `roadmap` | strategic-roadmap.md against the KAs and Input | `artifact-questions.yaml` |
+| `strategic` | Strategic Artifacts (strategy-brief, product-thesis, user-architecture, product-architecture, objectives-architecture) | `strategic-questions.yaml` |
+| `roadmap` | strategic-roadmap.md against the KAs and Input | `strategic-questions.yaml` |
 | `implementation` | stack.md, schema.md, architecture.md, features/feature-*.md | `implementation-questions.yaml` |
 
 Read the scope before reading anything else. The scope determines which defect types apply,

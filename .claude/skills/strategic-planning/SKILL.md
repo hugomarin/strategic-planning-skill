@@ -60,7 +60,7 @@ Parameters to pass:
 - `scope`: `"strategic"`
 - `project_path`: absolute path to the project folder
 - `input_path`: absolute path to `Input/Strategic/`
-- `artifact_questions_path`: absolute path to `.claude/skills/strategic-planning/references/artifact-questions.yaml`
+- `artifact_questions_path`: absolute path to `.claude/skills/strategic-planning/references/strategic-questions.yaml`
 
 Use the returned diagnostic report as the primary source for composing `_analysis.md`. Do not read `Input/` yourself before the agent has run — the agent does the heavy reading.
 
@@ -73,7 +73,7 @@ Invoke twice per planning session.
 - `artifacts_path`: absolute path to `Strategic Artifacts/`
 - `input_path`: absolute path to `Input/Strategic/`
 - `diagnostic_report_path`: absolute path to `Strategic Artifacts/_analysis.md`
-- `artifact_questions_path`: absolute path to `.claude/skills/strategic-planning/references/artifact-questions.yaml`
+- `artifact_questions_path`: absolute path to `.claude/skills/strategic-planning/references/strategic-questions.yaml`
 - `review_format_path`: absolute path to `.claude/references/review-report-format.md`
 
 **Invocation 2 — after roadmap is generated:**
@@ -171,7 +171,7 @@ This rule applies in both default (silent) and `--verbose` mode. It applies to a
 | 5 | `objectives-architecture.md` | Objectives: OKRs, KPIs, validation milestones, success signals per phase |
 
 Full templates: `references/templates.md`
-Evaluation criteria and failure signals: `references/artifact-questions.yaml`
+Evaluation criteria and failure signals: `references/strategic-questions.yaml`
 
 ---
 
@@ -247,7 +247,7 @@ Key entities found across documents and their relationships.
 
 ## Coverage map
 For each KA, what is answered, partially answered, and absent in the Input.
-Based on artifact-questions.yaml — evaluate each question against the Input.
+Based on strategic-questions.yaml — evaluate each question against the Input.
 
 | KA | Answered | Partial | Absent |
 |---|---|---|---|
@@ -539,7 +539,7 @@ A phase is never skipped to determine if it should be skipped. The evaluation is
 
 These define WHAT the product is and WHY it exists. Nothing else can be written without clear answers to these two questions.
 
-For each: read coverage from `_analysis.md` → evaluate against `artifact-questions.yaml` → create or recalibrate → present summary + NHR markers → wait for confirmation.
+For each: read coverage from `_analysis.md` → evaluate against `strategic-questions.yaml` → create or recalibrate → present summary + NHR markers → wait for confirmation.
 
 ### Phase 2 — user-architecture.md + product-architecture.md
 

@@ -21,7 +21,7 @@ La tesis central del skill lo declara así:
 SKILL.md                          ← El Orchestrator
 │
 ├── references/
-│   ├── artifact-questions.yaml   ← Motor de validación: criterios por artefacto
+│   ├── strategic-questions.yaml   ← Motor de validación: criterios por artefacto
 │   ├── templates.md              ← Estructura con disciplina
 │   ├── sp-questions-format.md    ← Protocolo del registro de preguntas abiertas
 │   └── feature-child-template.md ← Plantilla para features hijas
@@ -81,7 +81,7 @@ Invocar al inicio de `/sp-start` o `/sp-diagnose`, antes de componer `_analysis.
 Parameters to pass:
 - project_path: absolute path to the project folder
 - input_path: absolute path to Input/
-- artifact_questions_path: absolute path to references/artifact-questions.yaml
+- artifact_questions_path: absolute path to references/strategic-questions.yaml
 ```
 
 > *"Do not read `Input/` yourself before the agent has run — the agent does the heavy reading."*
@@ -96,7 +96,7 @@ Se invoca **dos veces** por sesión de planificación.
 - artifacts_path: absolute path to Strategic Artifacts/
 - input_path: absolute path to Input/
 - diagnostic_report_path: absolute path to Strategic Artifacts/_analysis.md
-- artifact_questions_path: absolute path to .claude/references/artifact-questions.yaml
+- artifact_questions_path: absolute path to .claude/references/strategic-questions.yaml
 - review_format_path: absolute path to .claude/references/review-report-format.md
 ```
 
@@ -141,7 +141,7 @@ El esquema de `_analysis.md` es scaffolding interno — no es un entregable. Se 
 
 ## Sources available
 ## Ontological map
-## Coverage map          ← aquí entra artifact-questions.yaml
+## Coverage map          ← aquí entra strategic-questions.yaml
 ## Claims with evidence
 ## Assumed claims
 ## Source conflicts
@@ -151,7 +151,7 @@ El esquema de `_analysis.md` es scaffolding interno — no es un entregable. Se 
 ## Proposed generation order
 ```
 
-La sección `Coverage map` es donde `artifact-questions.yaml` entra por primera vez: el Diagnostic Analyst evalúa cada pregunta del yaml contra el input disponible.
+La sección `Coverage map` es donde `strategic-questions.yaml` entra por primera vez: el Diagnostic Analyst evalúa cada pregunta del yaml contra el input disponible.
 
 **Checkpoint obligatorio:** antes de generar cualquier artefacto, el Orchestrator presenta un Input Analysis Summary al humano. Esta es la **única pausa obligatoria** antes de la generación:
 
@@ -173,7 +173,7 @@ Confirm to proceed, or adjust before I begin.
 
 ---
 
-## `artifact-questions.yaml` — El motor de validación
+## `strategic-questions.yaml` — El motor de validación
 
 Este archivo es el componente más crítico del sistema de calidad. No es documentación: es el criterio operativo que gobierna qué se puede generar, cuándo hay que detenerse, y qué necesita revisión humana.
 
@@ -331,7 +331,7 @@ Una pregunta no está resuelta hasta completar los tres pasos en la misma operac
 
 ## Review Checkpoints — El Adversarial Reviewer en acción
 
-Los Review Checkpoints son los dos momentos donde el sistema se desafía a sí mismo. El Adversarial Reviewer usa `artifact-questions.yaml` para detectar artefactos que parecen completos pero no lo son.
+Los Review Checkpoints son los dos momentos donde el sistema se desafía a sí mismo. El Adversarial Reviewer usa `strategic-questions.yaml` para detectar artefactos que parecen completos pero no lo son.
 
 Después de cada invocación, el reporte se presenta al humano **completo y sin comprimir**:
 
