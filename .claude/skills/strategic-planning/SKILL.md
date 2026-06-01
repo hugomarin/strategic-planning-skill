@@ -71,9 +71,9 @@ Invoke twice per planning session.
 **Invocation 1 — after all KAs are generated, before roadmap:**
 - `review_scope`: `"strategic"`
 - `artifacts_path`: absolute path to `Strategic Artifacts/`
-- `input_path`: absolute path to `Input/`
+- `input_path`: absolute path to `Input/Strategic/`
 - `diagnostic_report_path`: absolute path to `Strategic Artifacts/_analysis.md`
-- `artifact_questions_path`: absolute path to `.claude/references/artifact-questions.yaml`
+- `artifact_questions_path`: absolute path to `.claude/skills/strategic-planning/references/artifact-questions.yaml`
 - `review_format_path`: absolute path to `.claude/references/review-report-format.md`
 
 **Invocation 2 — after roadmap is generated:**
@@ -98,7 +98,7 @@ These commands control how the agent executes this skill. They can be used at an
 | `/sp-roadmap` | Attempts to generate `strategic-roadmap.md`. If any KA is missing or incomplete, fails with an explicit message listing what is blocking. |
 | `/sp-challenge [item]` | Applies Challenge Protocol to a specific claim, feature, or tactical item. |
 | `/sp-conflict` | Shows all open conflicts from the Conflict Map in `_analysis.md`. |
-| `/sp-questions [filter]` | Shows open questions from `open-questions.md`. Filters: no filter = all by priority · `alta` = high priority only · `[artifact-name]` = filtered by origin artifact · `bloqueantes` = only questions blocking a KA or the roadmap. |
+| `/sp-questions [filter]` | Shows open questions from `open-questions.md`. Filters: no filter = all by priority · `high` = high priority only · `[artifact-name]` = filtered by origin artifact · `blocking` = only questions blocking a KA or the roadmap. |
 
 **Default behavior (no command):** if the user provides Input without a command, the agent executes `/sp-start` automatically.
 
@@ -699,7 +699,7 @@ last_updated: YYYY-MM-DD
 
 | ID | Question / Gap | Artifact | Section | Current assumption | Blocks | Priority |
 |---|---|---|---|---|---|---|
-| OQ-001 | ... | strategy-brief | ICP | [assumption if any] | roadmap / KA / none | Alta |
+| OQ-001 | ... | strategy-brief | ICP | [assumption if any] | roadmap / KA / none | High |
 
 ## Resolved Decisions
 
@@ -730,10 +730,10 @@ Full resolution flow and examples: `references/sp-questions-format.md`
 Full output format and filter behavior: see `references/sp-questions-format.md`
 
 **Filter behavior summary:**
-- No filter → all open, ordered: blocking first, then Alta → Media → Baja
-- `alta` → Alta priority only
+- No filter → all open, ordered: blocking first, then High → Medium → Low
+- `high` → High priority only
 - `[artifact-name]` → questions from that artifact only
-- `bloqueantes` → only questions where Blocks = `roadmap` or a KA name
+- `blocking` → only questions where Blocks = `roadmap` or a KA name
 
 ### Rules
 
@@ -746,7 +746,7 @@ Full output format and filter behavior: see `references/sp-questions-format.md`
 ## Memory Update Rules
 
 Update `strategic-change-log.md` when the user says:
-"actualiza memoria" · "registra este cambio" · "esto queda como decisión" · "nueva versión" · "marca este roadmap como vigente" · "actualiza el historial" · "esto reemplaza lo anterior"
+"update memory" · "log this change" · "this is now a decision" · "new version" · "mark this roadmap as current" · "update the history" · "this replaces the previous version"
 
 Or when any trigger condition applies: artifact created or changed · roadmap created or changed · assumption becomes decision · human review resolved · constraint changes roadmap · open question resolved · review checkpoint completed.
 

@@ -6,37 +6,37 @@
 ## Open Questions [filter: {active filter or "all"}]
 
 ### Blocking the roadmap
-| ID | Pregunta | Artifact | Asunción actual |
+| ID | Question | Artifact | Current assumption |
 |---|---|---|---|
-| OQ-005 | ¿Cuál es el segmento de entrada? | objectives-architecture | Seg A + C como co-entrada |
+| OQ-005 | What is the entry segment? | objectives-architecture | Seg A + C as co-entry |
 
 ### High Priority
-| ID | Pregunta | Artifact | Asunción actual |
+| ID | Question | Artifact | Current assumption |
 |---|---|---|---|
 
 ### Medium Priority
-| ID | Pregunta | Artifact | Asunción actual |
+| ID | Question | Artifact | Current assumption |
 |---|---|---|---|
 
 ### Low Priority
-| ID | Pregunta | Artifact | Asunción actual |
+| ID | Question | Artifact | Current assumption |
 |---|---|---|---|
 
 ---
-Para resolver una pregunta: respóndela en conversación.
-El agente actualiza open-questions.md, el KA de origen y strategic-change-log en el mismo paso.
+To resolve a question: answer it in conversation.
+The agent updates open-questions.md, the source KA, and strategic-change-log in the same step.
 ```
 
 ## Filter behavior
 
 | Filter | What it shows |
 |---|---|
-| (none) | All open questions. Order: blocking first, then Alta → Media → Baja. |
-| `alta` | Only questions with Priority = Alta. |
+| (none) | All open questions. Order: blocking first, then High → Medium → Low. |
+| `high` | Only questions with Priority = High. |
 | `[artifact-name]` | Only questions where Artifact = that name. Example: `/sp-questions objectives-architecture` |
-| `bloqueantes` | Only questions where Blocks = `roadmap` or a specific KA name. |
+| `blocking` | Only questions where Blocks = `roadmap` or a specific KA name. |
 
-## Column: Asunción actual
+## Column: Current assumption
 
 This column is the critical output of `/sp-questions`.
 

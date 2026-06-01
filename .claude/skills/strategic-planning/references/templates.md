@@ -301,7 +301,7 @@ last_updated: YYYY-MM-DD
 
 | ID | Question / Gap | Artifact | Section | Current assumption | Blocks | Priority |
 |---|---|---|---|---|---|---|
-| OQ-001 | [question or gap] | [artifact name] | [section name] | [assumption if agent proceeded with one, or —] | roadmap / [artifact-name] / none | Alta / Media / Baja |
+| OQ-001 | [question or gap] | [artifact name] | [section name] | [assumption if agent proceeded with one, or —] | roadmap / [artifact-name] / none | High / Medium / Low |
 
 ## Resolved Decisions
 

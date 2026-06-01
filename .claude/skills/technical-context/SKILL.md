@@ -45,6 +45,7 @@ Subagents do not write files. Subagents do not publish artifacts. Subagents do n
 ### Invoking the Diagnostic Analyst
 
 Pass these parameters:
+- `scope`: `"implementation"`
 - `project_path`: absolute path to the project folder
 - `input_path`: absolute path to `Input/Implementation/`
 - `artifact_questions_path`: absolute path to `.claude/skills/technical-context/reference/implementation-questions.yaml`
@@ -109,16 +110,15 @@ No ASCII box-drawing characters. No unicode drawing symbols.
 │
 ├── Strategic Artifacts/                ← output of Phase 1 (readable for strategic context)
 │
-├── workflow/
-│   └── context/                        ← all generated artifacts live here
-│       ├── stack.md
-│       ├── schema.md
-│       ├── architecture.md
-│       ├── features/
-│       │   └── feature-[name].md
-│       ├── _technical_analysis.md           ← temporary; deleted after handoff
-│       ├── technical-change-log.md
-│       └── technical-open-questions.md
+├── Technical Artifacts/                ← all generated artifacts live here
+│   ├── stack.md
+│   ├── schema.md
+│   ├── architecture.md
+│   ├── features/
+│   │   └── feature-[name].md
+│   ├── _technical_analysis.md          ← temporary; deleted after handoff
+│   ├── technical-change-log.md
+│   └── technical-open-questions.md
 │
 └── .claude/
     └── skills/
