@@ -1,6 +1,6 @@
 ---
-name: strategic-planning-skill
-description: "Use this skill to convert loose business intention and source documents into structured strategic Knowledge Artifacts and an actionable strategic-roadmap.md. Part of Moment 1 of the Deus Product Development Harness. ALWAYS use when the user: mentions roadmap, strategic plan, product strategy, or planning phase; shares loose docs and asks to structure or turn into a plan; asks about ICP, product thesis, user-architecture, product-architecture, or objectives in a planning context; wants to prepare for task planning, Linear issues, or initiative definition; says 'ayúdame a planear', 'arma el roadmap', 'necesito la estrategia', 'dame el plan', 'define el ICP'; references Deus, Knowledge Artifacts, strategic-change-log, strategy-brief, product-thesis, user-architecture, product-architecture, objectives-architecture, or strategic-roadmap. Do NOT skip this skill if loose strategic material exists and needs to become an actionable plan."
+name: strategic-planning
+description: "Use this skill to convert loose business intention and source documents into structured Strategic Artifacts and an actionable strategic-roadmap.md. Part of Phase 1 of the Deus Product Development Harness. ALWAYS use when the user: mentions roadmap, strategic plan, product strategy, or planning phase; shares loose docs and asks to structure or turn into a plan; asks about ICP, product thesis, user-architecture, product-architecture, or objectives in a planning context; wants to prepare for task planning, Linear issues, or initiative definition; says 'help me plan', 'build the roadmap', 'I need the strategy', 'give me the plan', 'define the ICP'; references Deus, Strategic Artifacts, strategic-change-log, strategy-brief, product-thesis, user-architecture, product-architecture, objectives-architecture, or strategic-roadmap. Do NOT skip this skill if loose strategic material exists and needs to become an actionable plan."
 metadata:
   version: "6.0"
   last_updated: "2026-05-30"
@@ -34,7 +34,7 @@ Input/ (source documents)
   → _analysis.md deleted
 ```
 
-**Prerequisite rule:** `strategic-roadmap.md` cannot be generated until all 5 Knowledge Artifacts are complete. The roadmap is the output of the KA process, not a shortcut to it.
+**Prerequisite rule:** `strategic-roadmap.md` cannot be generated until all 5 Strategic Artifacts are complete. The roadmap is the output of the KA process, not a shortcut to it.
 
 ---
 
@@ -57,9 +57,10 @@ Subagents do not write files. Subagents do not publish artifacts. Subagents do n
 Invoke at the start of `/sp-start` or `/sp-diagnose`, before composing `_analysis.md`.
 
 Parameters to pass:
+- `scope`: `"strategic"`
 - `project_path`: absolute path to the project folder
-- `input_path`: absolute path to `Input/`
-- `artifact_questions_path`: absolute path to `references/artifact-questions.yaml`
+- `input_path`: absolute path to `Input/Strategic/`
+- `artifact_questions_path`: absolute path to `.claude/skills/strategic-planning/references/artifact-questions.yaml`
 
 Use the returned diagnostic report as the primary source for composing `_analysis.md`. Do not read `Input/` yourself before the agent has run — the agent does the heavy reading.
 
@@ -68,10 +69,10 @@ Use the returned diagnostic report as the primary source for composing `_analysi
 Invoke twice per planning session.
 
 **Invocation 1 — after all KAs are generated, before roadmap:**
-- `review_scope`: `"kas"`
-- `artifacts_path`: absolute path to `Knowledge Artifacts/`
+- `review_scope`: `"strategic"`
+- `artifacts_path`: absolute path to `Strategic Artifacts/`
 - `input_path`: absolute path to `Input/`
-- `diagnostic_report_path`: absolute path to `Knowledge Artifacts/_analysis.md`
+- `diagnostic_report_path`: absolute path to `Strategic Artifacts/_analysis.md`
 - `artifact_questions_path`: absolute path to `.claude/references/artifact-questions.yaml`
 - `review_format_path`: absolute path to `.claude/references/review-report-format.md`
 
@@ -134,7 +135,7 @@ This rule applies in both default (silent) and `--verbose` mode. It applies to a
 │   │   └── adversarial-reviewer.md
 │   └── references/
 │       └── review-report-format.md
-├── Knowledge Artifacts/
+├── Strategic Artifacts/
 │   ├── strategy-brief.md
 │   ├── product-thesis.md
 │   ├── user-architecture.md
@@ -152,14 +153,14 @@ This rule applies in both default (silent) and `--verbose` mode. It applies to a
 
 **Rules:**
 - `Input/` is read-only. The agent never writes to it.
-- All agent-generated files live in `Knowledge Artifacts/`.
-- `_analysis.md` is temporary scaffolding. Lives in `Knowledge Artifacts/` during the session. Deleted before final handoff.
+- All agent-generated files live in `Strategic Artifacts/`.
+- `_analysis.md` is temporary scaffolding. Lives in `Strategic Artifacts/` during the session. Deleted before final handoff.
 - `strategic-change-log.md` is always maintained. No artifact is created or materially changed without a log entry.
 - `open-questions.md` is created as soon as any artifact generates a gap or open question.
 
 ---
 
-## Required Knowledge Artifacts
+## Required Strategic Artifacts
 
 | # | Artifact | Function |
 |---|---|---|
@@ -594,7 +595,7 @@ After Phase 3 is complete and before generating the roadmap:
 
 The Review Checkpoint does not proceed until the Phase 4 gate is resolved.
 
-1. Invoke the Adversarial Reviewer with `review_scope: "kas"`.
+1. Invoke the Adversarial Reviewer with `review_scope: "strategic"`.
 2. Present the full two-block report to the human.
 3. Handle `orchestrator_revise` items. Present `human_decision_needed` items.
 4. Wait for human confirmation before proceeding to `/sp-roadmap`.
@@ -678,7 +679,7 @@ All other interaction: extract first, ask only when missing answer blocks the ro
 
 ## Open Questions Registry
 
-`open-questions.md` is the single source of truth for all open questions, gaps, and unresolved decisions across all Knowledge Artifacts. KAs are contextual views of this registry — not independent lists.
+`open-questions.md` is the single source of truth for all open questions, gaps, and unresolved decisions across all Strategic Artifacts. KAs are contextual views of this registry — not independent lists.
 
 **A question is not resolved until `open-questions.md` marks it as such.**
 
@@ -715,7 +716,7 @@ last_updated: YYYY-MM-DD
 Every open question or NHR marker inside a KA must carry its OQ-ID:
 ```
 [Needs Human Review] ICP lacks observable criteria → OQ-002
-¿Cuál es la estrategia de GTM? → OQ-001
+What is the GTM strategy? → OQ-001
 ```
 
 When generating or revising a KA: check if the question exists in `open-questions.md` → if not, create it with the next available ID → write `→ OQ-XXX` in the KA. Never duplicate.

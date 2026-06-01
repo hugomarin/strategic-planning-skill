@@ -61,7 +61,7 @@ Input/ (source documents)
 
 Una regla de prerrequisito gobierna todo el flujo:
 
-> *"`strategic-roadmap.md` cannot be generated until all 5 Knowledge Artifacts are complete. The roadmap is the output of the KA process, not a shortcut to it."*
+> *"`strategic-roadmap.md` cannot be generated until all 5 Strategic Artifacts are complete. The roadmap is the output of the KA process, not a shortcut to it."*
 
 ---
 
@@ -93,9 +93,9 @@ Se invoca **dos veces** por sesión de planificación.
 **Invocación 1 — después de todos los KAs, antes del roadmap:**
 ```
 - review_scope: "kas"
-- artifacts_path: absolute path to Knowledge Artifacts/
+- artifacts_path: absolute path to Strategic Artifacts/
 - input_path: absolute path to Input/
-- diagnostic_report_path: absolute path to Knowledge Artifacts/_analysis.md
+- diagnostic_report_path: absolute path to Strategic Artifacts/_analysis.md
 - artifact_questions_path: absolute path to .claude/references/artifact-questions.yaml
 - review_format_path: absolute path to .claude/references/review-report-format.md
 ```

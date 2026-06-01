@@ -1,0 +1,546 @@
+# implementation-questions.yaml
+# Reference file for the Implementation Context Skill.
+#
+# Purpose:
+#   Provides the agent with structured evaluation criteria for each implementation artifact.
+#   Used in two moments:
+#     1. During diagnostic phase: to build the coverage map against Input/ documents.
+#     2. During artifact generation: to verify each section is agent-executable before closing the file.
+#
+# Core test for every answer:
+#   "Can BUILD implement this without asking a single question?"
+#   If not, the answer fails — regardless of how detailed it looks.
+#
+# Structure per question:
+#   id:               unique identifier (artifact prefix + number)
+#   question:         what the agent must be able to answer from the artifact
+#   section:          which section of the artifact this maps to
+#   type:             required | quality
+#                     required = artifact is incomplete without this answer
+#                     quality  = artifact is weak without this answer, but can proceed with NHR marker
+#   failure_signal:   what a bad or insufficient answer looks like
+#   needs_human_review_if: condition that triggers a Needs Human Review marker
+
+# ─────────────────────────────────────────────
+# STACK
+# ─────────────────────────────────────────────
+artifacts:
+
+  - artifact: stack
+    description: >
+      Documents the complete technology stack, performance contracts, environments,
+      and agent conventions. Must be specific enough that BUILD can make any
+      implementation decision — framework, library, pattern, environment variable —
+      without consulting a human or another document.
+    questions:
+
+      - id: SK-01
+        question: "Is every technology in the stack documented with its role, not just its name?"
+        section: Stack
+        type: required
+        failure_signal: >
+          A technology appears in the list but its role is absent or generic
+          ('Supabase — database'). An agent reading this cannot know whether to use
+          Supabase for auth, realtime, storage, or all three — or which operations
+          go to Supabase vs. the local layer. Role must specify what the technology
+          does and what it does NOT do in this system.
+        needs_human_review_if: >
+          A technology is listed without a clear boundary (e.g. two technologies
+          could plausibly serve the same role and the artifact does not distinguish them).
+
+      - id: SK-02
+        question: "Is there a performance contract with measurable thresholds per dimension?"
+        section: Performance Contract
+        type: required
+        failure_signal: >
+          Performance is described as a principle ('the app must feel fast', 'local-first
+          means no waiting') rather than as measurable rules. An agent cannot write a
+          Performance Contract section in a Linear issue without knowing the specific
+          thresholds. Each dimension must have a number: keystroke latency in ms,
+          time to interactive in seconds, payload size in kB. Principles without
+          numbers are not contracts.
+        needs_human_review_if: >
+          Performance thresholds exist for some dimensions but not others, and the
+          missing dimensions affect the features being built.
+
+      - id: SK-03
+        question: "Is the local-first or data architecture pattern documented as an explicit data flow, not just a principle?"
+        section: Architecture Pattern
+        type: required
+        failure_signal: >
+          The architecture pattern is described as a metaphor ('the user never waits
+          for the server') rather than as a sequence: User action → local write (which layer,
+          which operation) → sync queue → remote write (when, how, what fields).
+          An agent building a sync feature cannot implement it from a metaphor.
+          The flow must be explicit enough to trace a specific field through the stack.
+        needs_human_review_if: >
+          Multiple runtimes exist (web, desktop) with different data flows and the
+          document does not distinguish what applies to each.
+
+      - id: SK-04
+        question: "Are agent conventions documented as explicit rules — naming, commits, testing, what to never do?"
+        section: Conventions
+        type: required
+        failure_signal: >
+          Conventions are listed as preferences ('we prefer Tailwind over styled-components')
+          rather than as enforced rules ('Tailwind is the only styling tool — no CSS modules,
+          no styled-components'). An agent that reads a preference may deviate; an agent
+          that reads a rule does not. Each convention must be a rule with enough specificity
+          to be applied without judgment.
+        needs_human_review_if: >
+          Conventions reference other documents for their full definition and those
+          documents are not in Input/.
+
+      - id: SK-05
+        question: "Are environment configurations documented per environment (dev/staging/prod) with service-specific settings?"
+        section: Environments
+        type: required
+        failure_signal: >
+          Environments are described generically ('staging mirrors production') without
+          documenting what specifically differs: which Supabase project, which domain,
+          which AI model, which SMTP configuration, which rate limits. An agent operating
+          against staging that is not explicitly separated from production is a liability.
+          Each environment must have its own configuration table.
+        needs_human_review_if: >
+          The document states that environments exist but does not document their differences.
+
+      - id: SK-06
+        question: "Are all environment variables documented with name, purpose, scope (server/client), and which environment uses them?"
+        section: Environment Variables
+        type: required
+        failure_signal: >
+          Environment variables are listed without scope (a variable that should be
+          server-only is not marked as such) or without purpose ('RESEND_API_KEY=' with
+          no explanation of when it is used and when it is not). An agent that does not
+          know whether a variable is safe to expose client-side may expose secrets.
+        needs_human_review_if: >
+          Variables exist whose scope or purpose cannot be inferred from their name alone.
+
+      - id: SK-07
+        question: "Are hard constraints documented as rules with enforcement mechanisms, not preferences?"
+        section: Constraints
+        type: required
+        failure_signal: >
+          A constraint that governs agent behavior is written as a guideline
+          ('agents should prefer staging over production') rather than a rule with a
+          consequence ('agents never operate against production — all operations run
+          against staging; deploy to production is only via merge to main'). Without
+          an enforcement frame, agents treat soft constraints as optional.
+        needs_human_review_if: >
+          A critical constraint exists but the enforcement mechanism is not defined.
+
+      - id: SK-08
+        question: "Is the typography system documented with fonts, their uses, and their exclusion rules?"
+        section: Typography
+        type: quality
+        failure_signal: >
+          Typography is mentioned but the rules for when to use each font are absent
+          or too vague ('Lora for epistolary content'). An agent building a new UI
+          component cannot know whether a heading in a modal should use Geist Sans or
+          Lora without explicit rules. The rule must specify: which font, in which
+          context, and what mixing is never allowed.
+        needs_human_review_if: >
+          New UI surfaces are being built that don't obviously map to the existing
+          typography rules.
+
+
+# ─────────────────────────────────────────────
+# SCHEMA
+# ─────────────────────────────────────────────
+
+  - artifact: schema
+    description: >
+      Documents the complete data model: entities, relationships, field-level schema,
+      RLS policies, business rules, indices, and schema transition rules. Must be
+      specific enough that BUILD can write any migration, RLS policy, or query
+      without consulting a human or inspecting the live database.
+    questions:
+
+      - id: SC-01
+        question: "Is every table documented with field name, type, constraints, and purpose — not just structure?"
+        section: Schema
+        type: required
+        failure_signal: >
+          A table lists its fields with types and constraints but the purpose of each
+          field is absent or obvious only in context. An agent building a feature that
+          touches this table cannot know what 'sync_status' means operationally, or why
+          'body_json' and 'body_text' both exist, without a note. Every non-obvious
+          field must have a note that explains its role and what values are valid.
+        needs_human_review_if: >
+          A field exists whose purpose or allowed values cannot be inferred from its
+          name and type alone.
+
+      - id: SC-02
+        question: "Are RLS policies documented for every table across all operations (select, insert, update, delete)?"
+        section: RLS
+        type: required
+        failure_signal: >
+          RLS is described partially: some tables have policies, others are absent or
+          documented as 'same as X'. An agent building a new feature that touches an
+          undocumented table cannot know whether to expect RLS restrictions, which
+          auth context is needed, or whether a service role key is required.
+          Every table must have an explicit policy row for every operation, even if
+          the answer is 'not permitted' or 'public'.
+        needs_human_review_if: >
+          A table is referenced in flows but not documented in the RLS table.
+
+      - id: SC-03
+        question: "Are business rules documented explicitly — triggers, automatic operations, cascades, and state transitions?"
+        section: Business Rules
+        type: required
+        failure_signal: >
+          A business rule is embedded in prose ('a correspondence is created automatically
+          when a writing receives its first reply') but not extracted as an explicit rule
+          with: what triggers it, what it creates, what fields it sets, and what happens
+          if it fails. An agent that misses a business rule embedded in a paragraph will
+          implement the feature without it. Rules must be explicit and extractable.
+        needs_human_review_if: >
+          A business rule involves a database trigger or function whose implementation
+          details are not in the artifact.
+
+      - id: SC-04
+        question: "Are schema transition rules documented — what is the objective schema vs. the effective (deployed) schema?"
+        section: Schema Transition
+        type: required
+        failure_signal: >
+          The artifact documents only the target schema without acknowledging that the
+          live database may differ. An agent that writes code assuming the objective schema
+          will break in production if the migration has not run. The artifact must state:
+          which parts of the schema are confirmed deployed, which are in transition,
+          and what forward/backward compatibility rules apply.
+        needs_human_review_if: >
+          A migration is in flight or recently completed and the artifact has not been
+          updated to reflect the current deployed state.
+
+      - id: SC-05
+        question: "Are all indices documented with the query patterns they serve?"
+        section: Indices
+        type: required
+        failure_signal: >
+          Indices are listed without explanation ('index on writing_id') leaving an agent
+          unable to determine whether a new query it is writing will be covered by an
+          existing index or requires a new one. Each index must document the query it
+          serves and why it exists, so an agent can reason about query performance
+          without running EXPLAIN.
+        needs_human_review_if: >
+          New query patterns are implied by features being built that are not covered
+          by any documented index.
+
+      - id: SC-06
+        question: "Is the entity relationship map documented — which tables reference which, and through what keys?"
+        section: Entities and Relationships
+        type: required
+        failure_signal: >
+          Relationships are implicit in the field documentation (a field is a FK to
+          another table) but no map exists that shows the full relationship graph.
+          An agent building a complex query or a cascade operation cannot reason about
+          the graph without tracing individual foreign keys across tables one by one.
+          A relationship map — even a text diagram — must exist.
+        needs_human_review_if: >
+          New tables are being added that introduce new relationship patterns not
+          present in the existing map.
+
+      - id: SC-07
+        question: "Is the local/remote sync behavior documented per table — what lives where, in what direction, and what fields are local-only?"
+        section: Sync Behavior
+        type: required
+        failure_signal: >
+          The sync architecture is described at the system level ('local-first means
+          writes go to IndexedDB first, then sync to Supabase') but not at the table
+          or field level. An agent cannot know whether 'sync_status' should ever be
+          sent to the server, or whether a specific table has a remote counterpart,
+          without field-level sync documentation. Fields that are local-only must be
+          explicitly marked.
+        needs_human_review_if: >
+          A new table is being added and its sync behavior has not been determined.
+
+      - id: SC-08
+        question: "Are soft delete patterns documented — which tables use them, how they work, and what queries must filter for them?"
+        section: Schema
+        type: quality
+        failure_signal: >
+          Soft delete is mentioned ('deleted_at is nullable') but the rules are absent:
+          do all queries automatically filter out deleted rows? Is there an RLS policy
+          that handles it? Can deleted rows ever be restored? An agent that does not
+          know the soft delete convention will either show deleted data or write
+          redundant filters.
+        needs_human_review_if: >
+          Soft delete behavior is inconsistent across tables.
+
+
+# ─────────────────────────────────────────────
+# ARCHITECTURE
+# ─────────────────────────────────────────────
+
+  - artifact: architecture
+    description: >
+      Documents the system-wide product architecture: application modes, navigation
+      structure, page inventory, data flow, and architectural decisions. Must be
+      specific enough that BUILD can place any new feature, page, or component
+      in the correct layer without reinterpreting the product intent.
+    questions:
+
+      - id: AR-01
+        question: "Are all application modes documented with their purpose, their distinct behavior, AND what they explicitly are not?"
+        section: Application Modes
+        type: required
+        failure_signal: >
+          A mode is described by what it does ('Correspondences is for reading')
+          without documenting what it must never do ('Correspondences is a reading
+          interface — it does not allow writing or editing'). Without the negative
+          constraint, an agent may add write functionality to a read-only surface.
+          Each mode must define its purpose, its primary behavior, and its explicit
+          exclusions.
+        needs_human_review_if: >
+          A new feature being built could reasonably belong to more than one mode
+          and the artifact does not provide a decision rule.
+
+      - id: AR-02
+        question: "Is the navigation architecture documented with exact dimensions, transition behavior, and coordination rules between panels?"
+        section: Navigation Architecture
+        type: required
+        failure_signal: >
+          Navigation structure is described visually ('there is a sidebar and an editor')
+          without the rules that govern it: exact pixel widths, what happens when
+          a panel opens or closes, how panels coordinate (which moves first, which
+          stays fixed), and what the total layout constraint is. An agent building
+          any navigation component without these rules will produce a layout that
+          breaks the coordination contract.
+        needs_human_review_if: >
+          A new panel or layout zone is being added that does not exist in the
+          current architecture.
+
+      - id: AR-03
+        question: "Is every route documented with its auth requirement, redirect behavior, and mobile behavior?"
+        section: Page Inventory
+        type: required
+        failure_signal: >
+          Routes are listed with their purpose but auth requirements are absent or
+          implied ('all private routes require auth'). An agent building a new route
+          cannot know whether to apply middleware, which redirect to use on auth
+          failure, or whether the route should render anything on mobile.
+          Every route must have: auth requirement (public/private/dual), redirect
+          on auth failure, and mobile behavior (full/read-only/unavailable).
+        needs_human_review_if: >
+          A new route type is being introduced that does not fit the existing
+          public/private/dual categories.
+
+      - id: AR-04
+        question: "Are architecture decisions documented as explicit rules with rationale — not buried in prose?"
+        section: Architecture Decisions
+        type: required
+        failure_signal: >
+          A decision is present in the document but framed as explanation rather than
+          as a rule ('the body uses Geist Sans because of legibility tests in prototypes'
+          vs. 'body text uses Geist Sans — never Lora — this was validated in prototypes
+          and must not be reversed without explicit decision'). An agent reading an
+          explanation may treat it as context; an agent reading a rule applies it.
+          Every decision that governs future implementation must be extracted as a rule.
+        needs_human_review_if: >
+          A decision in the artifact conflicts with a decision in the stack or schema
+          document.
+
+      - id: AR-05
+        question: "Are invariants documented — rules that must hold at every system boundary (product → HTTP, product → SQL, product → filesystem)?"
+        section: Invariants
+        type: required
+        failure_signal: >
+          The artifact describes what the system does without documenting what it must
+          never do at boundaries. An invariant like 'sync_status is local-only and
+          must never be sent in an HTTP payload' or 'user-supplied text is normalized
+          before being used in HTTP headers' is not visible from the feature spec —
+          it only becomes visible when it is violated. Invariants must be extracted
+          and listed explicitly so BUILD can check them before merging.
+        needs_human_review_if: >
+          A prior incident exists that was caused by a boundary violation not yet
+          documented as an invariant.
+
+      - id: AR-06
+        question: "Are the data architecture patterns documented at the component level — not just the system level?"
+        section: Data Architecture
+        type: required
+        failure_signal: >
+          Data flow is described at the architecture level ('local-first: IndexedDB
+          then Supabase') but not at the component level. An agent building a specific
+          view cannot know whether that view's data comes from the local layer or
+          triggers a server fetch, whether it should use RSC or client state, or
+          whether a navigation event should trigger a refetch. The principle without
+          the component-level application rule produces implementation inconsistencies.
+        needs_human_review_if: >
+          A new data pattern is being introduced (e.g. a server-side fetch in a
+          primarily client-side flow) that is not covered by the existing rules.
+
+      - id: AR-07
+        question: "Are component states documented for all complex UI components — expanded, collapsed, loading, empty, error?"
+        section: UI Components
+        type: quality
+        failure_signal: >
+          A component is described in its default or active state without documenting
+          edge states. An agent implementing a sidebar that 'collapses to icon-only'
+          without knowing what the collapsed state looks like, how it transitions,
+          and what the collapsed width is will invent the behavior. Every component
+          with more than one meaningful state must document all of them.
+        needs_human_review_if: >
+          A component is referenced in the architecture but its spec lives in a
+          feature document that is not in Input/.
+
+
+# ─────────────────────────────────────────────
+# FEATURE SPEC
+# ─────────────────────────────────────────────
+
+  - artifact: feature-spec
+    description: >
+      Documents the complete behavior of one feature: user flows, UI states, error
+      conditions, edge cases, data operations, and acceptance criteria. Must be
+      specific enough that BUILD can implement the feature end-to-end and a
+      reviewer can verify it without asking the author a single question.
+    questions:
+
+      - id: FS-01
+        question: "Is every user flow documented as numbered steps with a clear trigger, explicit state changes, and a verifiable outcome?"
+        section: User Flows
+        type: required
+        failure_signal: >
+          A flow is described in prose ('the user writes and the content is saved')
+          rather than as steps: (1) user types in editor → TipTap emits onUpdate →
+          (2) body_json and body_text written to IndexedDB immediately → (3) sync
+          worker debounces 1.5s → (4) PATCH sent to /api/writings/[id]. Without
+          numbered steps and explicit state changes, two agents will implement the
+          same flow differently. Every flow must have a trigger, numbered steps,
+          and a state at the end.
+        needs_human_review_if: >
+          A flow involves a third-party service (auth, email, AI provider) whose
+          behavior is not fully specified in the artifact.
+
+      - id: FS-02
+        question: "Is every error condition documented — what can fail, what the system does when it fails, and what the user sees?"
+        section: Error States
+        type: required
+        failure_signal: >
+          The feature describes the happy path without documenting failure modes.
+          An agent that implements only the happy path will ship a feature that fails
+          silently or crashes on the first error. Each async operation, each external
+          call, and each user input must have: what can go wrong, how the system
+          handles it (retry, fallback, fail fast), and what the user sees (error message,
+          unchanged state, degraded mode).
+        needs_human_review_if: >
+          An error condition exists whose handling requires a product decision
+          (e.g. should a failed sync block the user or proceed silently).
+
+      - id: FS-03
+        question: "Is every loading state documented — what is shown while an async operation is in progress?"
+        section: Loading States
+        type: required
+        failure_signal: >
+          Loading states are absent or described generically ('show a spinner').
+          An agent implementing a feature without loading state specs will either
+          block the UI unnecessarily or show nothing during long operations. Each
+          async operation must specify: what the UI shows while waiting, whether
+          the user can interact during loading, and when the loading state ends.
+        needs_human_review_if: >
+          A loading state requires a design decision about whether to use skeleton
+          screens, spinners, or inline indicators.
+
+      - id: FS-04
+        question: "Is every empty state documented — what is shown when a view has no data?"
+        section: Empty States
+        type: required
+        failure_signal: >
+          The feature documents what a populated view looks like without documenting
+          what the same view looks like when empty. An agent will either render
+          nothing, show a broken layout, or invent copy. Each view that can be empty
+          must specify: the message shown, whether there is a call to action,
+          and whether the empty state differs by context (first-time user vs.
+          returning user with no data).
+        needs_human_review_if: >
+          The empty state requires final copy that has not been written.
+
+      - id: FS-05
+        question: "Are data operations documented per flow step — which table, which operation, which fields, triggered by what?"
+        section: Data Operations
+        type: required
+        failure_signal: >
+          A flow says 'the writing is saved' without specifying: which table (writings),
+          which operation (PATCH /api/writings/[id] or direct IndexedDB write), which
+          fields are included in the payload, and what triggers the operation (debounce
+          after onUpdate, or explicit user action). An agent that does not know which
+          layer to write to, which fields to include, or when to trigger the operation
+          will either over-write (sending sync_status to the server) or under-write
+          (missing a field that downstream features depend on).
+        needs_human_review_if: >
+          A data operation requires a new table or field that is not yet in the schema.
+
+      - id: FS-06
+        question: "Are permission checks documented for each user action — who can do what, and what happens when they cannot?"
+        section: Permissions
+        type: required
+        failure_signal: >
+          The feature describes actions without specifying who is authorized to perform
+          them. An agent that does not know whether a 'respond' button should be shown
+          to all users or only to users with can_respond=true will either show it to
+          everyone or hide it from everyone. Each user action must specify: the
+          permission required, where that permission comes from (RLS, a field, a role),
+          and what the UI shows when permission is absent.
+        needs_human_review_if: >
+          A permission model is being introduced that does not exist in the current schema.
+
+      - id: FS-07
+        question: "Are UI details specific enough to prevent misinterpretation — exact text, exact component, exact behavior on interaction?"
+        section: UI Specification
+        type: required
+        failure_signal: >
+          UI is described at the intent level ('a button to respond') without specifying:
+          the exact label text, which component it uses, where it appears in the layout,
+          what it looks like in its disabled state, and what happens on click.
+          An agent that invents UI details will produce something that requires
+          a design review cycle. Every interactive element must have: label, position,
+          component, states (default/hover/disabled/active), and action.
+        needs_human_review_if: >
+          Final copy or visual design for a UI element has not been decided.
+
+      - id: FS-08
+        question: "Are edge cases documented — what happens when the flow is interrupted, retried, done out of order, or done twice?"
+        section: Edge Cases
+        type: required
+        failure_signal: >
+          The feature documents the sequential happy path without considering
+          interruptions. What happens if the user navigates away mid-flow?
+          What if a duplicate submission is sent? What if a dependency (another
+          writing, another user) no longer exists when the flow completes?
+          Each edge case that is not documented will either be handled incorrectly
+          or will trigger a bug that is only discovered in production.
+        needs_human_review_if: >
+          An edge case requires a product decision about whether to prevent,
+          recover, or surface the condition to the user.
+
+      - id: FS-09
+        question: "Are acceptance criteria stated as verifiable conditions — binary, observable, testable by an agent without human judgment?"
+        section: Acceptance Criteria
+        type: required
+        failure_signal: >
+          Acceptance criteria are stated as goals ('the editor should feel responsive')
+          rather than verifiable conditions ('keystroke response time is < 16ms as
+          measured by Playwright performance trace'). An agent that cannot test an
+          acceptance criterion without human judgment cannot close the issue autonomously.
+          Each criterion must be: binary (pass/fail), observable (measurable without
+          subjective assessment), and actionable (an automated test can verify it).
+        needs_human_review_if: >
+          An acceptance criterion depends on a measurement tool or benchmark that
+          has not been set up.
+
+      - id: FS-10
+        question: "Are cross-feature dependencies documented — what must exist or be working before this feature can function?"
+        section: Dependencies
+        type: required
+        failure_signal: >
+          A feature is documented in isolation without declaring what it depends on.
+          A feature that sends email without declaring it depends on the SMTP
+          configuration being in place, or a feature that shows a TrustGraph without
+          declaring it depends on the data ingestion layer having run, will be
+          implemented but not work. Every dependency — on another feature, another
+          service, another piece of data, or another migration — must be declared
+          explicitly.
+        needs_human_review_if: >
+          A dependency is on an external service or API that is not yet configured
+          or integrated.

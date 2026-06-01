@@ -2,7 +2,7 @@
 
 Working environment for **Moment 1: Strategic Planning** of the Deus Product Harness — a system for converting loose business intention into verifiable, versioned production artifacts.
 
-This repository hosts the `strategic-planning-skill` (v6.0) and its multi-agent orchestration: instead of generating documents that "the AI happened to produce", it produces the product that was **actually decided**, with explicit mechanisms for diagnosis, validation, and review operating *before*, *during*, and *after* every artifact.
+This repository hosts the `strategic-planning` (v6.0) and its multi-agent orchestration: instead of generating documents that "the AI happened to produce", it produces the product that was **actually decided**, with explicit mechanisms for diagnosis, validation, and review operating *before*, *during*, and *after* every artifact.
 
 > *"The output should not be what AI happened to generate. It should be the product that was actually decided."*
 
@@ -10,7 +10,7 @@ This repository hosts the `strategic-planning-skill` (v6.0) and its multi-agent 
 
 ## What it does
 
-The skill takes the raw material in `Input/` (strategy proposals, notes, research) and turns it into a coherent set of **Knowledge Artifacts** plus an actionable `strategic-roadmap.md`:
+The skill takes the raw material in `Input/` (strategy proposals, notes, research) and turns it into a coherent set of **Strategic Artifacts** plus an actionable `strategic-roadmap.md`:
 
 - **strategy-brief** — the consolidated strategic reading
 - **product-thesis** — where the product can exist and why
@@ -44,7 +44,7 @@ All commands live in `.claude/commands/` and are available from the first messag
 |---------|---------|
 | `/sp-start` | Run the full diagnosis → artifacts → roadmap pipeline |
 | `/sp-diagnose` | Run only the diagnostic analysis of `Input/` |
-| `/sp-run` | Generate Knowledge Artifacts |
+| `/sp-run` | Generate Strategic Artifacts |
 | `/sp-roadmap` | Generate the strategic roadmap |
 | `/sp-questions` | Manage the open-questions register |
 | `/sp-challenge` | Adversarial review pass |
@@ -61,14 +61,14 @@ All commands live in `.claude/commands/` and are available from the first messag
 .
 ├── CLAUDE.md                       # Project context + command dispatch rules
 ├── Input/                          # Source documents (read-only — never written to)
-├── Knowledge Artifacts/            # All generated artifacts live here
+├── Strategic Artifacts/            # All generated artifacts live here
 ├── skill-diseccion-strategic-planning.md   # Annotated dissection of the skill
 └── .claude/
     ├── commands/                   # /sp-* command definitions
     ├── agents/                     # Subagent definitions (analyst, reviewer)
     ├── references/                 # Shared schemas (e.g. review report format)
     └── skills/
-        └── strategic-planning-skill/
+        └── strategic-planning/
             ├── SKILL.md            # The Orchestrator — all execution logic
             └── references/         # Validation engine, templates, question protocol
 ```
@@ -76,8 +76,8 @@ All commands live in `.claude/commands/` and are available from the first messag
 ### Folder conventions
 
 - `Input/` is **read-only**. The agent never writes there.
-- `Knowledge Artifacts/` holds every generated artifact.
-- `Knowledge Artifacts/_analysis.md` is temporary scaffolding, deleted before handoff.
+- `Strategic Artifacts/` holds every generated artifact.
+- `Strategic Artifacts/_analysis.md` is temporary scaffolding, deleted before handoff.
 - The skill is fully self-contained under `.claude/skills/` — no dependency on a globally installed plugin.
 
 ---
@@ -86,7 +86,7 @@ All commands live in `.claude/commands/` and are available from the first messag
 
 1. Drop your strategic source documents into `Input/`.
 2. Run `/sp-start` to execute the full pipeline, or `/sp-diagnose` to inspect the input first.
-3. Review the generated Knowledge Artifacts and `strategic-roadmap.md`.
+3. Review the generated Strategic Artifacts and `strategic-roadmap.md`.
 4. Use `/sp-questions` to resolve any open assumptions the skill flagged.
 
 Before executing any `/sp-*` command, the harness validates that the active skill version matches the version declared in `CLAUDE.md`. On mismatch, run `/sp-sync`.
@@ -95,7 +95,7 @@ Before executing any `/sp-*` command, the harness validates that the active skil
 
 ## Versioning
 
-`strategic-planning-skill` **v6.0** is active. Highlights:
+`strategic-planning` **v6.0** is active. Highlights:
 
 - Verbose toggle (silent by default, `--verbose` for incremental output)
 - ASCII format rule (markdown tables only — no box-drawing characters)

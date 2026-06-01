@@ -1,4 +1,4 @@
-Load the strategic planning skill from `.claude/skills/strategic-planning-skill/SKILL.md` in this project folder if not already active.
+Load the strategic planning skill from `.claude/skills/strategic-planning/SKILL.md` in this project folder if not already active.
 
 Then execute `/sp-questions $ARGUMENTS` as defined in the skill: show open questions from `open-questions.md`.
 
