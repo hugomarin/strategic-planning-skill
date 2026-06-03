@@ -43,8 +43,9 @@ Parameters received from the Orchestrator:
 
 - **scope**: `strategic` or `implementation`
 - **project_path**: absolute path to the project folder
-- **input_path**: path to the `Input/` folder
+- **input_path**: path to the `Input/` folder — for `strategic` scope: `Input/Strategic/`; for `implementation` scope: `Input/Implementation/`
 - **artifact_questions_path**: absolute path to the questions YAML for this scope
+- **strategic_artifacts_path** *(optional, implementation scope only)*: absolute path to `Strategic Artifacts/` — pass only when `scope = implementation`; read these files as strategic context alongside `Input/Implementation/`
 
 ---
 
@@ -59,7 +60,11 @@ You will use it in Step 3 to evaluate coverage. Know the questions before you re
 
 ### Step 2: Inventory the Input
 
-List all files in `Input/`. For each file, note:
+**When scope is `strategic`:** list all files in `Input/Strategic/`.
+
+**When scope is `implementation`:** list all files in `Input/Implementation/` AND all files in `Strategic Artifacts/` (if `strategic_artifacts_path` was provided). Label Strategic Artifacts rows as `strategic context` in the Type column — they are input for alignment evaluation, not technical source material.
+
+For each file, note:
 
 | File | Type | Recency | Description | Best used for | Caution |
 |---|---|---|---|---|---|
@@ -97,7 +102,9 @@ Evaluate every question in the YAML — one by one, by ID — against the Input.
 
 **Routing rules:**
 - Every `required` question classified as `partial` or `absent` → NHR marker, open question, or non-omittable question.
-- Every `quality` question classified as `partial` or `absent` → open question or tracked gap.
+- Every `quality` question classified as `partial` or `absent` → open question or tracked gap. *(strategic scope — `strategic-questions.yaml`)*
+- Every `conditional` question: evaluate whether the condition applies to this product. If it does → treat as `required`. If it does not → mark `N/A` and skip. *(implementation scope — `implementation-questions.yaml`)*
+- Every `advisory` question classified as `partial` or `absent` → tracked gap only; does not generate NHR or block artifact completion. *(implementation scope)*
 - An `answered` item with `Failure Signal = Yes` is a classification error. Correct it.
 
 **Coverage Map Summary:**
@@ -181,6 +188,14 @@ Examples of buried decisions to look for:
 - Constraint stated as a principle ("the user never waits for the server") that implies a hard rule ("all writes must go to local storage first; remote writes are always background")
 - An error case mentioned in passing ("if the migration hasn't run yet, the code should handle it gracefully") that is actually an architectural contract
 
+**Implementation scope — feature inventory:**
+
+List features found in `Input/Implementation/` (and referenced in `Strategic Artifacts/features/` if available) that have sufficient material for a spec.
+A feature has sufficient material if: the trigger is identifiable, at least one user flow can be described, and the primary data entities are known.
+
+| Feature name | Source documents | Completeness estimate | Key gaps |
+|---|---|---|---|
+
 ---
 
 ### Step 8: Identify Open Questions
@@ -257,6 +272,9 @@ Return a single structured report. Do not omit sections — use "None found" if 
 
 ## 6. [Tactical Items | Decisions Buried in Prose]
 [table — heading changes based on scope]
+
+## 6b. Feature Inventory *(implementation scope only — omit for strategic)*
+[table: Feature name | Source documents | Completeness estimate | Key gaps]
 
 ## 7. Open Questions
 | Question | Artifact affected | Classification |

@@ -48,11 +48,12 @@ Parameters received from the Orchestrator:
 
 - **review_scope**: `strategic`, `roadmap`, or `implementation`
 - **project_path**: absolute path to the project folder
-- **input_path**: path to `Input/`
+- **input_path**: path to `Input/` — for `strategic`/`roadmap`: `Input/Strategic/`; for `implementation`: `Input/Implementation/`
 - **artifacts_path**: path to the artifacts folder (`Strategic Artifacts/` or `Technical Artifacts/`)
 - **diagnostic_report_path**: path to the diagnostic file (`_analysis.md` or `_technical_analysis.md`)
 - **artifact_questions_path**: path to the questions YAML for this scope
-- **review_format_path**: path to `review-report-format.md` (if provided)
+- **review_format_path**: absolute path to `.claude/references/review-report-format.md` — always provided; read it in Step 1 to validate your output schema before writing the report
+- **strategic_artifacts_path** *(optional, implementation scope only)*: absolute path to `Strategic Artifacts/` — read these when reviewing SA-01..SA-04 strategic alignment questions
 
 ---
 
@@ -60,8 +61,9 @@ Parameters received from the Orchestrator:
 
 ### Step 1: Read in this order
 
-1. The questions YAML at `artifact_questions_path` — defines sufficiency criteria.
-2. The diagnostic file at `diagnostic_report_path` — your primary reference for attribution.
+1. `review_format_path` — defines the exact output schema you must produce. Read this first so your report matches it.
+2. The questions YAML at `artifact_questions_path` — defines sufficiency criteria.
+3. The diagnostic file at `diagnostic_report_path` — your primary reference for attribution.
    If this file is missing, stop immediately:
 
    ```
@@ -71,8 +73,9 @@ Parameters received from the Orchestrator:
    Run the diagnostic command before invoking the reviewer.
    ```
 
-3. The generated artifacts.
-4. Files in `Input/` — for direct source traceability.
+4. The generated artifacts.
+5. Files in `Input/` — for direct source traceability.
+6. Files in `Strategic Artifacts/` if `strategic_artifacts_path` was provided — for SA-01..SA-04 alignment evaluation.
 
 ### Step 2: Use the diagnostic as your attribution baseline
 
@@ -90,13 +93,14 @@ For every problem found, create a defect entry:
 
 | Field | Content |
 |---|---|
-| Artifact | File and section |
+| ID | Sequential defect ID: `D-001`, `D-002`, etc. Unique across both blocks. |
+| Defect | One sentence describing the specific problem. Must name the artifact, section, or claim. |
 | Defect type | From the applicable table below |
+| Artifact / Section | File and section where the defect appears |
 | YAML ID | The question ID from the questions YAML, if applicable |
-| Severity | `blocking` / `major` / `minor` |
-| Attribution | `input` / `agent` / `human_decision_needed` / `mixed` |
-| Evidence | Specific quote or reference |
-| Suggested next step | From the controlled vocabulary below |
+| Severity | `blocking` / `high` / `medium` / `low` |
+| Attribution | `input` / `agent` / `human_decision_needed` / `mixed` — always include a one-sentence reason |
+| Next step | From the controlled vocabulary below |
 
 **YAML sufficiency check:** for each artifact section, verify it against the corresponding
 question. If the section triggers a `failure_signal`, create a defect entry with the YAML ID.
@@ -207,38 +211,82 @@ and presence of non-omittable gaps.
 **Block 2 — Process/Agent Quality:** Score 1–10 based on fidelity to skill execution,
 evidence traceability, NHR usage, versioning, and artifact actionability.
 
+| Score | Block 1 — Input Quality | Block 2 — Process / Agent Quality |
+|---|---|---|
+| 9–10 | Complete, consistent, well-evidenced. Minimal gaps. | Faithful execution. No inventions. NHR used correctly. |
+| 7–8 | Covers most areas. Some gaps or assumed claims, not blocking. | Mostly correct. Minor issues, artifact reliability intact. |
+| 5–6 | Meaningful gaps. Several areas required assumptions. | Some problems. One or more artifacts have traceability issues. |
+| 3–4 | Significantly incomplete or contradictory. Artifacts weakened. | Multiple failures. Invented or unattributed content present. |
+| 1–2 | Does not support artifact generation reliably. Major decisions missing. | Execution significantly unfaithful. Artifacts unreliable. |
+
 Scores are not the primary output — the defect log is. Scores give the human a fast read.
 
 ---
 
 ## Output Format
 
-Two blocks, clearly separated. Do not merge them.
+Produce exactly three sections in this order. Do not merge or reorder them.
+The output schema is defined in `review-report-format.md` — follow it exactly.
 
 ```md
 # Adversarial Review — [Strategic | Roadmap | Implementation]
+Generated: [YYYY-MM-DD]
+Scope: [strategic | roadmap | implementation]
 
 ## Block 1 — Input Quality
 
 **Score:** X/10
-
 **Summary:** [2–3 sentences on the overall quality of Input/ for this scope]
 
-**Defects:**
+**Defect log:**
 
-| # | Artifact | Section | Defect type | YAML ID | Severity | Attribution | Evidence | Next step |
-|---|---|---|---|---|---|---|---|---|
+| D-ID | Defect | Type | Artifact / Section | YAML ID | Severity | Attribution | Next step |
+|---|---|---|---|---|---|---|---|
+
+**What the input covers well:**
+[Bullet list of areas with strong coverage and evidence]
+
+**What the input is missing:**
+[Bullet list of absent information that weakened artifacts]
+
+**Open questions the input did not resolve:**
+[Bullet list of gaps the human must address]
+
+**Assumed claims that should be validated:**
+[Bullet list of claims treated as fact without evidence]
+
+---
 
 ## Block 2 — Process / Agent Quality
 
 **Score:** X/10
-
 **Summary:** [2–3 sentences on how well the Orchestrator executed the skill]
 
-**Defects:**
+**Defect log:**
 
-| # | Artifact | Section | Defect type | YAML ID | Severity | Attribution | Evidence | Next step |
-|---|---|---|---|---|---|---|---|---|
+| D-ID | Defect | Type | Artifact / Section | YAML ID | Severity | Attribution | Next step |
+|---|---|---|---|---|---|---|---|
+
+**What the agent did well:**
+[Bullet list of strong execution areas]
+
+**Execution issues found:**
+[Narrative or bullets grouped by artifact]
+
+---
+
+## Human Checkpoint
+
+**Blocking issues (must resolve before proceeding):**
+[List D-IDs with severity = blocking]
+
+**Decisions needed from you:**
+[List D-IDs attributable to human_decision_needed]
+
+**Items the Orchestrator will handle:**
+[List D-IDs the Orchestrator can resolve without human input]
+
+Confirm to proceed, or indicate which items to address first.
 ```
 
 If no defects are found in a block, say so explicitly — do not leave it empty.

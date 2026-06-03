@@ -65,10 +65,13 @@ Invoked once, after all artifacts are generated.
 
 Pass these parameters:
 - `review_scope`: `"implementation"`
+- `project_path`: absolute path to the project folder
 - `artifacts_path`: absolute path to `Technical Artifacts/`
 - `input_path`: absolute path to `Input/Implementation/`
+- `strategic_artifacts_path`: absolute path to `Strategic Artifacts/`
 - `diagnostic_report_path`: absolute path to `Technical Artifacts/_technical_analysis.md`
 - `artifact_questions_path`: absolute path to `.claude/skills/technical-context/reference/implementation-questions.yaml`
+- `review_format_path`: absolute path to `.claude/references/review-report-format.md`
 
 ---
 
@@ -235,8 +238,10 @@ Contradictions between Input/ documents.
 |---|---|---|---|---|---|
 
 ## Feature inventory
-List of features found in Input/ with enough material to generate a feature spec.
-For each: name, source docs, completeness estimate.
+Taken from section 6b of the Diagnostic Analyst report.
+For each feature: name, source docs, completeness estimate, key gaps.
+A feature is included here only if the Diagnostic Analyst identified it as having sufficient material
+(identifiable trigger, at least one describable flow, known primary data entities).
 
 ## Non-omittable questions
 Questions that must be answered before artifacts can be marked active.
@@ -295,7 +300,7 @@ The agent must not fill artifact sections with its own inferences when Input doe
 
 | Situation | Correct agent behavior |
 |---|---|
-| Section is missing but not blocking | Leave empty with an explicit question → OQ-XXX |
+| Section is missing but not blocking | Leave empty with an explicit question → OQ-TXXX |
 | Section affects BUILD decisions or constraints | Ask before generating. Do not generate first and mark NHR after. |
 | Human cannot answer and agent must proceed | Propose options with reasoning and wait for choice, or leave as `[TO BE DEFINED]` |
 
@@ -303,7 +308,7 @@ The agent must not fill artifact sections with its own inferences when Input doe
 If a field exists in a flow but not in the schema, surface it as a gap — do not add it speculatively.
 
 **For stack specifically:** never invent performance thresholds. If thresholds exist in Input
-as principles ('must be fast'), extract them as-is and mark them as requiring formalization → OQ-XXX.
+as principles ('must be fast'), extract them as-is and mark them as requiring formalization → OQ-TXXX.
 
 ### Principle 2 — Complexity proportional to Input
 
@@ -346,7 +351,7 @@ extracts technology decisions, performance thresholds, conventions, environment 
 **Critical extraction steps:**
 1. For each technology: name, role, what it does NOT do in this system.
 2. For performance: extract all measurable thresholds. If thresholds are in prose, formalize them.
-   If they are missing, mark as → OQ-XXX.
+   If they are missing, mark as → OQ-TXXX.
 3. For conventions: restate as enforced rules, not preferences.
 4. For environments: produce one configuration table per environment.
 
@@ -398,7 +403,7 @@ For each feature with sufficient material:
 4. Document all error, loading, and empty states.
 5. Document data operations per step.
 6. State acceptance criteria as binary, verifiable conditions.
-7. For gaps: leave as `[TO BE DEFINED]` → OQ-XXX. Do not invent behavior.
+7. For gaps: leave as `[TO BE DEFINED]` → OQ-TXXX. Do not invent behavior.
 
 After generating each feature spec, present a summary and wait for confirmation before the next.
 
@@ -482,7 +487,7 @@ status: active
 last_updated: YYYY-MM-DD
 ---
 
-# Implementation Open Questions
+# Technical Open Questions
 
 ## Open Questions
 
@@ -495,9 +500,11 @@ last_updated: YYYY-MM-DD
 |---|---|---|---|---|
 ```
 
-**Cross-reference protocol:** every NHR marker inside an artifact must carry its OQ-ID:
+**ID prefix:** technical open questions use the prefix `OQ-T` (e.g. `OQ-T001`) to distinguish them from strategic open questions (`OQ-001` in `open-questions.md`). IDs are never reused, even after resolution.
+
+**Cross-reference protocol:** every NHR marker inside an artifact must carry its OQ-T ID:
 ```
-[Needs Human Review] RLS policy for margins table on update not defined → OQ-003
+[Needs Human Review] RLS policy for margins table on update not defined → OQ-T003
 ```
 
 When a question is resolved: (1) move to Resolved in `technical-open-questions.md`,

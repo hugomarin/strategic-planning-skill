@@ -12,7 +12,7 @@
 **Usage rules:**
 - Templates define structure, not content. Sections are populated only when Input/ supports them.
 - A sparse but honest artifact is more useful than a dense artifact built on agent inference.
-- Sections with no Input coverage are left with an explicit question → OQ-XXX, not filled structurally.
+- Sections with no Input coverage are left with an explicit question → OQ-TXXX, not filled structurally.
 - Every artifact includes YAML frontmatter. Status starts as `draft`. Only the human changes it to `active`.
 
 ---
@@ -53,7 +53,7 @@ of its Linear issue.
 |---|---|---|---|
 | [e.g. Interaction latency] | [e.g. Time from user action to visible response] | [e.g. < 16ms at 60fps] | [e.g. Playwright performance trace] |
 
-[If thresholds are not yet defined, leave as [TO BE DEFINED] → OQ-XXX. Do not invent numbers.]
+[If thresholds are not yet defined, leave as [TO BE DEFINED] → OQ-TXXX. Do not invent numbers.]
 
 ---
 
@@ -83,7 +83,7 @@ If multiple runtimes exist (web, desktop, mobile), document each separately.]
 
 **Desktop runtime (if applicable):**
 ```
-[explicit sequence, or: "Not yet defined → OQ-XXX"]
+[explicit sequence, or: "Not yet defined → OQ-TXXX"]
 ```
 
 ---
@@ -368,16 +368,17 @@ exact dimensions and coordination rules will invent them and break the layout co
 
 ### Layout Zones
 
-```
-[ASCII or text diagram of the layout with zone names and widths]
-Example:
-┌──────────┬──────────────────────┬─────────────┐
-│ Sidebar  │ List Panel           │ Editor      │
-│  52px    │  240px               │  flex-1     │
-└──────────┴──────────────────────┴─────────────┘
-  always     opens/closes           never moves
-  visible    without moving editor
-```
+[Document layout zones with names, widths, and rules. Use plain text or markdown tables —
+do not use unicode box-drawing characters (┌ │ └ ─ ┐) in the artifact; they are prohibited
+by the Output Format Rule. Describe layout verbally or in a table instead.]
+
+Example using table:
+
+| Zone | Width | Visibility | Rule |
+|---|---|---|---|
+| Sidebar | 52px | always visible | never moves |
+| List Panel | 240px | opens/closes | transition without moving Editor |
+| Editor | flex-1 | always visible | never moves |
 
 **Total width constraint:** [e.g. Sidebar + List Panel = 292px always. Editor never moves.]
 
@@ -438,7 +439,7 @@ Navigation: local DB — no server fetch triggered by navigation events
 
 ### [Runtime name — e.g. Desktop] (if applicable)
 
-[Same structure, or: "Not yet defined → OQ-XXX"]
+[Same structure, or: "Not yet defined → OQ-TXXX"]
 
 ---
 
@@ -484,8 +485,11 @@ status: draft
 current: false
 last_updated: YYYY-MM-DD
 needs_human_review: true
-strategic_reference: Strategic Artifacts/features/[feature-name].md
+strategic_reference: "Strategic Artifacts/features/[feature-name].md"
 ---
+[strategic_reference links this technical feature spec to its parent strategic feature child.
+Set it to the path of the matching file in Strategic Artifacts/features/, or omit if no strategic
+feature child exists for this feature.]
 
 # Feature: [Feature Name]
 
@@ -614,7 +618,7 @@ system response so BUILD does not have to invent it.]
 
 [Binary, testable conditions. Each criterion must be verifiable by an agent or automated
 test without human judgment. If a criterion requires a human to decide whether it passes,
-it is not ready — rewrite it or mark it [TO BE DEFINED] → OQ-XXX.]
+it is not ready — rewrite it or mark it [TO BE DEFINED] → OQ-TXXX.]
 
 - [ ] [e.g. Auto-save triggers within Xms of the last keystroke — measurable by Playwright timer]
 - [ ] [e.g. Writing exists in local DB before any remote write is attempted — verifiable by intercepting network requests]
