@@ -15,9 +15,10 @@
 #   id:               unique identifier (artifact prefix + number)
 #   question:         what the agent must be able to answer from the artifact
 #   section:          which section of the artifact this maps to
-#   type:             required | quality
-#                     required = artifact is incomplete without this answer
-#                     quality  = artifact is weak without this answer, but can proceed with NHR marker
+#   type:             required | conditional | advisory
+#                     required    = artifact is incomplete without this answer
+#                     conditional = only applies when the product or roadmap includes the relevant capability
+#                     advisory    = artifact is weaker without this answer, but can proceed with NHR marker
 #   failure_signal:   what a bad or insufficient answer looks like
 #   needs_human_review_if: condition that triggers a Needs Human Review marker
 
@@ -792,4 +793,123 @@ artifacts:
         needs_human_review_if: >
           BUILD would need to decide whether a capability belongs in dashboard, detail page,
           settings, admin, modal, side panel, command menu, wizard, or external surface.
+
+  # ─────────────────────────────────────────────
+  # CROSS-ARTIFACT COHERENCE
+  # ─────────────────────────────────────────────
+
+  - artifact: cross_artifact
+    description: >
+      Evaluates whether the four implementation artifacts are internally coherent with each other.
+      A technically complete artifact can still produce broken implementations if its assumptions
+      contradict or ignore decisions made in sibling artifacts. These questions are evaluated
+      after all four artifacts exist — not during individual generation phases.
+
+    questions:
+
+      - id: CA-01
+        question: "Does stack.md define all infrastructure capabilities that schema.md depends on?"
+        section: Stack / Schema Coherence
+        type: required
+        failure_signal: >
+          schema.md references database features, RLS policies, triggers, extensions, replication,
+          storage buckets, or external data services that are not declared in stack.md.
+        needs_human_review_if: >
+          A schema decision depends on a database or infrastructure capability that is not
+          confirmed in the stack, or that conflicts with a stack constraint.
+
+      - id: CA-02
+        question: "Does schema.md define all entities and fields that architecture.md pages depend on?"
+        section: Schema / Architecture Coherence
+        type: required
+        failure_signal: >
+          architecture.md describes page data requirements, filters, queries, or state transitions
+          that reference entities, fields, or relationships not defined in schema.md.
+        needs_human_review_if: >
+          A page or route loads, creates, or modifies data whose schema definition is absent
+          or incomplete.
+
+      - id: CA-03
+        question: "Do feature specs reference only stack capabilities, schema entities, and routes that are defined?"
+        section: Features / Sibling Artifacts Coherence
+        type: required
+        failure_signal: >
+          A feature spec refers to a technology, API endpoint, database table, field,
+          permission model, or page that is not defined in stack.md, schema.md, or architecture.md.
+        needs_human_review_if: >
+          BUILD would encounter undefined dependencies while implementing a feature spec.
+
+      - id: CA-04
+        question: "Does architecture.md contain a route or surface for every feature in features/?"
+        section: Architecture / Features Coherence
+        type: required
+        failure_signal: >
+          A feature spec describes user-facing behavior but there is no corresponding route,
+          page, or surface defined in architecture.md that would host that behavior.
+        needs_human_review_if: >
+          The feature cannot be placed in the application without inventing a new surface.
+
+  # ─────────────────────────────────────────────
+  # STRATEGIC ALIGNMENT
+  # ─────────────────────────────────────────────
+
+  - artifact: strategic_alignment
+    description: >
+      Evaluates whether the technical artifacts are coherent with the strategic artifacts
+      in Strategic Artifacts/ (product-thesis.md, user-architecture.md, product-architecture.md,
+      objectives-architecture.md). Technical artifacts that contradict or ignore strategic
+      decisions create implementation drift — features get built correctly but solve the
+      wrong problem. These questions are evaluated using Strategic Artifacts/ as input context,
+      which the Diagnostic Analyst reads alongside Input/Implementation/.
+
+    questions:
+
+      - id: SA-01
+        question: "Does stack.md reflect constraints and principles stated in the product thesis?"
+        section: Stack / Product Thesis
+        type: required
+        failure_signal: >
+          product-thesis.md defines constraints such as simplicity, specific user expectations,
+          vendor independence, privacy model, or cost model, but stack.md makes choices that
+          conflict with or ignore those constraints without justification.
+        needs_human_review_if: >
+          A stack decision would be materially different if product thesis constraints were applied,
+          or the thesis is silent on a choice that has strategic implications.
+
+      - id: SA-02
+        question: "Does schema.md model the user entities and ownership boundaries described in user-architecture.md?"
+        section: Schema / User Architecture
+        type: required
+        failure_signal: >
+          user-architecture.md defines user segments, roles, ownership relationships, or data
+          boundaries, but schema.md does not model them, models them differently, or treats
+          them as implementation details without acknowledging the divergence.
+        needs_human_review_if: >
+          The schema ownership model contradicts who the product thesis identifies as the
+          primary owner of data or workflow.
+
+      - id: SA-03
+        question: "Does architecture.md reflect the product's core mode and primary workflows from product-architecture.md?"
+        section: Architecture / Product Architecture
+        type: required
+        failure_signal: >
+          product-architecture.md defines primary product modes, the core loop, or main workflows,
+          but architecture.md page structure or navigation does not reflect them, or introduces
+          surfaces and flows not grounded in the product architecture.
+        needs_human_review_if: >
+          The application structure would lead BUILD to implement a different product interaction
+          model than what the product architecture defines.
+
+      - id: SA-04
+        question: "Are the features in features/ traceable to objectives in objectives-architecture.md?"
+        section: Features / Objectives Architecture
+        type: conditional
+        failure_signal: >
+          objectives-architecture.md defines strategic priorities, but features/ includes work
+          that is not traceable to any objective, or omits features that are directly tied to
+          high-priority objectives.
+        needs_human_review_if: >
+          The feature set could lead the PM agent to create issues for work that is misaligned
+          with the current strategic objectives, or leave high-priority objectives without
+          any implementation coverage.
 

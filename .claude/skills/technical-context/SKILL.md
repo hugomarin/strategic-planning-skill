@@ -48,12 +48,16 @@ Pass these parameters:
 - `scope`: `"implementation"`
 - `project_path`: absolute path to the project folder
 - `input_path`: absolute path to `Input/Implementation/`
+- `strategic_artifacts_path`: absolute path to `Strategic Artifacts/`
 - `artifact_questions_path`: absolute path to `.claude/skills/technical-context/reference/implementation-questions.yaml`
 
-The agent reads `Input/` and evaluates every question in `implementation-questions.yaml`
-against the source material. It returns a structured diagnostic report.
+The agent reads both `Input/Implementation/` and `Strategic Artifacts/` as input — technical
+source documents plus the strategic context (product thesis, user architecture, product
+architecture, objectives architecture). It evaluates every question in
+`implementation-questions.yaml` against the combined material and returns a structured
+diagnostic report.
 
-Do not read `Input/` yourself before the agent has run.
+Do not read `Input/` or `Strategic Artifacts/` yourself before the agent has run.
 
 ### Invoking the Adversarial Reviewer
 
@@ -196,7 +200,7 @@ Use the diagnostic report as the primary source. Structure the file:
 # Implementation Input Analysis (internal scaffolding — delete after session)
 
 ## Sources available
-List of files in Input/ with a one-line description of each.
+List of files in Input/Implementation/ and Strategic Artifacts/ with a one-line description of each.
 
 ## Missing sources
 Documents referenced in Input/ that are not present.
@@ -213,6 +217,8 @@ Based on implementation-questions.yaml — evaluate each question against Input.
 | schema | ... | ... | ... |
 | architecture | ... | ... | ... |
 | feature specs | ... | ... | ... |
+| cross-artifact coherence | ... | ... | ... |
+| strategic alignment | ... | ... | ... |
 
 ## Decisions buried in prose
 Statements that function as rules but are written as explanations.
@@ -334,7 +340,7 @@ A phase is never skipped to determine if it should be skipped.
 
 ### Phase 1 — stack.md
 
-Reads `_technical_analysis.md` → evaluates against SK-01 through SK-08 →
+Reads `_technical_analysis.md` → evaluates against SK-01 through SK-19 →
 extracts technology decisions, performance thresholds, conventions, environment configs.
 
 **Critical extraction steps:**
@@ -350,7 +356,7 @@ Present summary + NHR markers. Wait for confirmation.
 
 ### Phase 2 — schema.md
 
-Reads `_technical_analysis.md` + `stack.md` → evaluates against SC-01 through SC-08.
+Reads `_technical_analysis.md` + `stack.md` → evaluates against DB-01 through DB-15.
 
 **Critical extraction steps:**
 1. For each table: produce field-level documentation with type, constraints, purpose note.
@@ -368,7 +374,7 @@ Present summary + NHR markers. Wait for confirmation.
 
 ### Phase 3 — architecture.md
 
-Reads `_technical_analysis.md` + `stack.md` + `schema.md` → evaluates against AR-01 through AR-07.
+Reads `_technical_analysis.md` + `stack.md` + `schema.md` → evaluates against AR-01 through AR-12.
 
 **Critical extraction steps:**
 1. For each mode: purpose, primary behavior, explicit exclusions.
@@ -387,7 +393,7 @@ Present summary + NHR markers. Wait for confirmation.
 
 For each feature with sufficient material:
 1. Create `Technical Artifacts/features/feature-[name].md`.
-2. Evaluate against FS-01 through FS-10.
+2. Evaluate against FN-01 through FN-12.
 3. Document all flows as numbered steps.
 4. Document all error, loading, and empty states.
 5. Document data operations per step.
